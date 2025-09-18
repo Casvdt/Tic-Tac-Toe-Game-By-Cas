@@ -1,19 +1,28 @@
+// === Basis referenties naar elementen op de pagina ===
+// Dit pakt alle vakjes van het bord
 const cells = document.querySelectorAll(".cell");
+// Tekst die laat zien wie er aan de beurt is
 const turnText = document.querySelector(".turnText");
+// Knop om opnieuw te beginnen
 const restartButton = document.querySelector(".restartButton");
+// Knop om je gebruikersnaam in te voeren
 const usernameButton = document.querySelector(".Userbtn");
+// Tellers voor de score (X en O)
 let firstplayerCredits = document.querySelector(".firstplayerCredits");
 let secondplayerCredits = document.querySelector(".secondplayerCredits");
+// De lijst in de ranglijst (leaderboard)
 const leaderboardList = document.querySelector(".leaderboard-list");
-// Modal elements will be queried on open to ensure availability after HTML load
+// Selectievakken voor moeilijkheid en wie begint
 const aiDifficultySelect = document.querySelector(".aiDifficulty");
 const startPlayerSelect = document.querySelector(".startPlayer");
+// Achtergrondmuziek element
 const bgAudio = document.getElementById("bg-audio");
-let audioStarted = false; // start muziek pas na eerste interactie
+let audioStarted = false; // Start muziek pas na eerste klik/toets
 
 
 
 
+// Vraagt om een naam en slaat die op
 function myUsername() {
     let person = prompt("Please choose a username:", "");
     let text = person && person.trim() !== "" ? person.trim() : "Anonymous";
@@ -23,14 +32,17 @@ function myUsername() {
     renderLeaderboard();
 }
 
+// Klik op de knop om je naam te kiezen
   usernameButton.addEventListener("click", myUsername);
 
  
 
 
+// Huidige gebruikersnaam uit opslag (of standaard)
 let currentUserName = window.localStorage.getItem('username') || "Anonymous";
 document.querySelector(".demo").innerHTML = currentUserName;
 
+// Leest de ranglijst uit lokale opslag
 function loadLeaderboard() {
     try {
         const raw = window.localStorage.getItem("leaderboard");
@@ -40,10 +52,12 @@ function loadLeaderboard() {
     }
 }
 
+// Slaat de ranglijst op in lokale opslag
 function saveLeaderboard(board) {
     window.localStorage.setItem("leaderboard", JSON.stringify(board));
 }
 
+// Bouwt en toont de ranglijst in de pagina
 function renderLeaderboard() {
     if (!leaderboardList) return;
     const data = loadLeaderboard();
@@ -56,6 +70,7 @@ function renderLeaderboard() {
     });
 }
 
+// Opent het profielvenster met statistieken
 function openProfile(name) {
     const modal = document.querySelector('.profile-modal');
     const closeBtn = document.querySelector('.profile-close');
@@ -87,11 +102,13 @@ function openProfile(name) {
     modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('open'); };
 }
 
+// Sluit het profielvenster (als het bestaat)
 function closeProfile() {
     if (!profileModal) return;
     profileModal.classList.remove('open');
 }
 
+// Alle winnende combinaties op het bord
 const winConditions = [
     [0, 1, 2],
     [3, 4, 5],
@@ -103,12 +120,14 @@ const winConditions = [
     [2, 4, 6]
 ];
 
+// Bord (9 vakjes), huidige speler en of het spel bezig is
 let options = ["", "", "", "", "", "", "", "", ""];
 let currentPlayer = "X";
 let running = false;
 
 initializeGame();
 
+// Zet het spel klaar en koppel alle events
 function initializeGame() {
     cells.forEach(cell => cell.addEventListener("click", cellClicked));
     restartButton.addEventListener("click", restartGame);
@@ -122,6 +141,7 @@ function initializeGame() {
     };
     document.addEventListener('pointerdown', startAudioOnce, { passive: true });
     document.addEventListener('keydown', startAudioOnce);
+    // Onthoud/zet de moeilijkheidsgraad
     if (aiDifficultySelect) {
         aiDifficultySelect.addEventListener("change", () => {
             window.localStorage.setItem("ttt_ai_difficulty", aiDifficultySelect.value);
@@ -129,28 +149,30 @@ function initializeGame() {
         const savedDiff = window.localStorage.getItem("ttt_ai_difficulty") || "medium";
         aiDifficultySelect.value = savedDiff;
     }
+    // Onthoud/zet wie er mag beginnen (speler of computer)
     if (startPlayerSelect) {
         startPlayerSelect.addEventListener("change", () => {
             window.localStorage.setItem("ttt_start_player", startPlayerSelect.value);
         });
         const savedStart = window.localStorage.getItem("ttt_start_player") || "player";
         startPlayerSelect.value = savedStart;
-        // Apply selection at game start
+        // Pas toe bij opstarten van het spel
         currentPlayer = savedStart === "player" ? "X" : "O";
     }
     turnText.textContent = `${currentPlayer}'s turn`;
     running = true;
     renderLeaderboard();
-    // listeners added when modal opens
-    // If computer starts, make its opening move automatically
+    // Als de computer begint, doe dan meteen een zet
     if (currentPlayer === "O") {
         setTimeout(computerMove, 500);
     }
 }
 
+// Wanneer je op een vakje klikt om te zetten
 function cellClicked() {
     const cellIndex = this.getAttribute("cellIndex");
 
+    // Niet toestaan: al gevuld, spel klaar of computer is aan de beurt
     if (options[cellIndex] != "" || !running || currentPlayer === "O") {
         return;
     }
@@ -160,20 +182,23 @@ function cellClicked() {
 
    
     if (running && currentPlayer === "O") {
-        setTimeout(computerMove, 500); // Delay for better user experience
+        setTimeout(computerMove, 500); // Kleine vertraging voor betere beleving
     }
 }
 
+// Schrijf de zet weg in het bord en op het scherm
 function updateCell(cell, index) {
     options[index] = currentPlayer;
     cell.textContent = currentPlayer;
 }
 
+// Wissel van speler (X <-> O)
 function changePlayer() {
     currentPlayer = currentPlayer === "X" ? "O" : "X";
     turnText.textContent = `${currentPlayer}'s turn`;
 }
 
+// Controleer of iemand 3 op een rij heeft of dat het gelijkspel is
 function checkWinner() {
     let roundWon = false;
 
@@ -184,7 +209,7 @@ function checkWinner() {
         const cellC = options[condition[2]];
 
         if (cellA == "" || cellB == "" || cellC == "") {
-            continue;
+            continue; // Nog niet gevuld
         }
         if (cellA == cellB && cellB == cellC) {
             roundWon = true;
@@ -194,8 +219,8 @@ function checkWinner() {
 
     if (roundWon) {
         turnText.textContent = ` ${currentPlayer} wins!`;
-        updateWins();
-        running = false;
+        updateWins(); // Tel de winst en sla op
+        running = false; // Stop het spel
     } else if (!options.includes("")) {
         turnText.textContent = `Draw!`;
         running = false;
@@ -204,7 +229,7 @@ function checkWinner() {
     }
 }
 
-// Evaluate the board: +10 if 'O' wins, -10 if 'X' wins, 0 otherwise
+// Beoordeel het bord: +10 als O wint, -10 als X wint, 0 anders
 function evaluateBoard(board) {
     for (let i = 0; i < winConditions.length; i++) {
         const [a, b, c] = winConditions[i];
@@ -215,22 +240,23 @@ function evaluateBoard(board) {
     return 0;
 }
 
+// Zijn er nog lege vakjes?
 function isMovesLeft(board) {
     return board.includes("");
 }
 
-// Minimax with depth to prefer quicker wins and delay losses
+// Minimax: zoek de beste zet voor de computer (met dieptevoorkeur)
 function minimax(board, depth, isMaximizing) {
     const score = evaluateBoard(board);
 
     if (score === 10) {
-        return score - depth; // faster win is better
+        return score - depth; // Sneller winnen is beter
     }
     if (score === -10) {
-        return score + depth; // slower loss is better
+        return score + depth; // Langzamer verliezen is beter
     }
     if (!isMovesLeft(board)) {
-        return 0; // draw
+        return 0; // Gelijkspel
     }
 
     if (isMaximizing) {
@@ -256,6 +282,7 @@ function minimax(board, depth, isMaximizing) {
     }
 }
 
+// Vind de beste zet-index voor O
 function findBestMove(board) {
     let bestVal = -Infinity;
     let bestMove = -1;
@@ -271,9 +298,10 @@ function findBestMove(board) {
             }
         }
     }
-    return bestMove;
+    return bestMove; // Index van beste zet
 }
 
+// Laat de computer (O) een zet doen (rekening met moeilijkheid)
 function computerMove() {
     if (!running || currentPlayer !== "O") {
         return;
@@ -283,7 +311,7 @@ function computerMove() {
     const boardCopy = options.slice();
     const bestIndex = findBestMove(boardCopy);
 
-    // Build list of empty cells
+    // Maak lijst van lege vakjes
     const emptyCells = options.reduce((acc, val, idx) => {
         if (val === "") acc.push(idx);
         return acc;
@@ -291,19 +319,19 @@ function computerMove() {
 
     let chosenIndex = bestIndex;
     if (difficulty === "easy") {
-        // 70% chance random, 30% optimal
+        // 70% kans willekeurig, 30% beste zet
         const useRandom = Math.random() < 0.7;
         if (useRandom && emptyCells.length > 0) {
             chosenIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         }
     } else if (difficulty === "medium") {
-        // 30% chance random, 70% optimal
+        // 30% kans willekeurig, 70% beste zet
         const useRandom = Math.random() < 0.3;
         if (useRandom && emptyCells.length > 0) {
             chosenIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         }
     } else {
-        // hard: always optimal (minimax)
+        // hard: altijd beste zet (minimax)
         chosenIndex = bestIndex;
     }
 
@@ -314,6 +342,7 @@ function computerMove() {
     }
 }
 
+// Start een nieuw spel en pas de startspeler toe
 function restartGame() {
     const startPref = (startPlayerSelect && startPlayerSelect.value) || window.localStorage.getItem("ttt_start_player") || "player";
     currentPlayer = startPref === "player" ? "X" : "O";
@@ -327,9 +356,11 @@ function restartGame() {
     }
 }
 
+// Aantal winsten bijhouden voor X en O
 let firstPlayerWins = 0;
 let secondPlayerWins = 0;
 
+// Werk de score en ranglijst bij wanneer iemand wint
 function updateWins() {
     if (currentPlayer === "X") {
         firstPlayerWins++;
@@ -339,7 +370,7 @@ function updateWins() {
         const difficulty = (aiDifficultySelect && aiDifficultySelect.value) || window.localStorage.getItem("ttt_ai_difficulty") || "medium";
         const existing = board[name];
         if (typeof existing === 'number') {
-            // migrate old schema number -> object
+            // Zet oud formaat om (alleen getal) naar object
             board[name] = { total: existing, easy: 0, medium: 0, hard: 0 };
         }
         const stats = board[name] || { total: 0, easy: 0, medium: 0, hard: 0 };
