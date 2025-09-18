@@ -50,6 +50,14 @@
 
   <button class="Userbtn">Username</button>
 
+  <div class="start-controls">
+    <label for="startPlayer">Who starts?</label>
+    <select id="startPlayer" class="startPlayer">
+      <option value="player" selected>You (X)</option>
+      <option value="computer">Computer (O)</option>
+    </select>
+  </div>
+
   <div class="ai-controls">
     <label for="aiDifficulty">AI Difficulty:</label>
     <select id="aiDifficulty" class="aiDifficulty">
@@ -63,8 +71,8 @@
 
 
   <div class="Background-audio">
-    <audio controls autoplay loop hidden>
-      <source src="AUDIO/Shreksophone (Original).mp3" type="" />
+    <audio id="bg-audio" loop hidden>
+      <source src="AUDIO/Shreksophone (Original).mp3" type="audio/mpeg" />
     </audio>
   </div>
 

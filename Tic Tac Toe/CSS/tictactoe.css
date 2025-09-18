@@ -198,7 +198,7 @@ button:hover {
 button:active { transform: translateY(1px); }
 
 /* Info panels */
-.leaderboard, .ai-controls {
+.leaderboard, .ai-controls, .start-controls {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
@@ -296,14 +296,35 @@ button:active { transform: translateY(1px); }
   line-height: 1;
 }
 
-.ai-controls label { margin-right: 8px; font-weight: 600; }
+.ai-controls label { margin-right: 8px; font-weight: 600; color: #eaeaea; }
 
 .ai-controls select {
-  background: rgba(255,255,255,0.06);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(20,22,28,0.98);
+  color: #eaeaea;
+  border: 1px solid rgba(255,255,255,0.16);
   border-radius: 8px;
   padding: 8px 10px;
+}
+
+.start-controls label { margin-right: 8px; font-weight: 600; color: #eaeaea; }
+
+.start-controls select {
+  background: rgba(20,22,28,0.98);
+  color: #eaeaea;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+/* Donkere dropdown lijsten bij openen (geforceerd voor browsers die :where toepassen) */
+.ai-controls select, .start-controls select {
+  appearance: none;
+}
+
+/* Opties donker (werkt in veel browsers) */
+select option {
+  background-color: #111419;
+  color: #eaeaea;
 }
 
 /* Scores / username */

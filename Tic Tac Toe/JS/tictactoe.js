@@ -7,8 +7,11 @@ let secondplayerCredits = document.querySelector(".secondplayerCredits");
 const leaderboardList = document.querySelector(".leaderboard-list");
 // Modal elements will be queried on open to ensure availability after HTML load
 const aiDifficultySelect = document.querySelector(".aiDifficulty");
+const startPlayerSelect = document.querySelector(".startPlayer");
+const bgAudio = document.getElementById("bg-audio");
+let audioStarted = false; // start muziek pas na eerste interactie
 
-// window.localStorage.setItem('username', 'Cas');
+
 
 
 function myUsername() {
@@ -109,6 +112,16 @@ initializeGame();
 function initializeGame() {
     cells.forEach(cell => cell.addEventListener("click", cellClicked));
     restartButton.addEventListener("click", restartGame);
+    // Start audio bij eerste gebruikersactie (klik/toets)
+    const startAudioOnce = () => {
+        if (audioStarted || !bgAudio) return;
+        audioStarted = true;
+        bgAudio.play().catch(() => { /* sommige browsers blokkeren dit; negeer fout */ });
+        document.removeEventListener('pointerdown', startAudioOnce);
+        document.removeEventListener('keydown', startAudioOnce);
+    };
+    document.addEventListener('pointerdown', startAudioOnce, { passive: true });
+    document.addEventListener('keydown', startAudioOnce);
     if (aiDifficultySelect) {
         aiDifficultySelect.addEventListener("change", () => {
             window.localStorage.setItem("ttt_ai_difficulty", aiDifficultySelect.value);
@@ -116,16 +129,29 @@ function initializeGame() {
         const savedDiff = window.localStorage.getItem("ttt_ai_difficulty") || "medium";
         aiDifficultySelect.value = savedDiff;
     }
+    if (startPlayerSelect) {
+        startPlayerSelect.addEventListener("change", () => {
+            window.localStorage.setItem("ttt_start_player", startPlayerSelect.value);
+        });
+        const savedStart = window.localStorage.getItem("ttt_start_player") || "player";
+        startPlayerSelect.value = savedStart;
+        // Apply selection at game start
+        currentPlayer = savedStart === "player" ? "X" : "O";
+    }
     turnText.textContent = `${currentPlayer}'s turn`;
     running = true;
     renderLeaderboard();
     // listeners added when modal opens
+    // If computer starts, make its opening move automatically
+    if (currentPlayer === "O") {
+        setTimeout(computerMove, 500);
+    }
 }
 
 function cellClicked() {
     const cellIndex = this.getAttribute("cellIndex");
 
-    if (options[cellIndex] != "" || !running) {
+    if (options[cellIndex] != "" || !running || currentPlayer === "O") {
         return;
     }
 
@@ -289,14 +315,15 @@ function computerMove() {
 }
 
 function restartGame() {
-    currentPlayer = "X";
+    const startPref = (startPlayerSelect && startPlayerSelect.value) || window.localStorage.getItem("ttt_start_player") || "player";
+    currentPlayer = startPref === "player" ? "X" : "O";
     options = ["", "", "", "", "", "", "", "", ""];
     turnText.textContent = `${currentPlayer}'s turn`;
     cells.forEach((cell) => (cell.textContent = ""));
     running = true;
 
     if (currentPlayer === "O") {
-        setTimeout(computerMove, 1000);
+        setTimeout(computerMove, 500);
     }
 }
 
