@@ -65,6 +65,7 @@ function setCurrentUser(name) {
         window.localStorage.setItem('username', name);
     }
     renderLeaderboard();
+    updateAdminLinkVisibility();
 }
 
 function getCurrentUser() {
@@ -244,6 +245,21 @@ if (!storedUser || storedUser === 'Anonymous') {
 }
 let currentUserName = storedUser || "Anonymous";
 document.querySelector(".demo").textContent = currentUserName;
+updateAdminLinkVisibility();
+
+// Genereer een per-device ID voor anonieme stats isolatie
+function getDeviceId() {
+    let id = window.localStorage.getItem('ttt_device_id');
+    if (!id) {
+        id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        window.localStorage.setItem('ttt_device_id', id);
+    }
+    return id;
+}
+const deviceId = getDeviceId();
+function getAnonymousKey() {
+    return `Anonymous - ${deviceId.slice(-6)}`;
+}
 
 // Leest de ranglijst uit lokale opslag
 function loadLeaderboard() {
@@ -266,7 +282,11 @@ function renderLeaderboard() {
     const data = loadLeaderboard();
     const entries = Object.entries(data).map(([name, value]) => [name, typeof value === 'number' ? { total: value, easy: 0, medium: 0, hard: 0 } : value]);
     entries.sort((a, b) => (b[1].total || 0) - (a[1].total || 0));
-    leaderboardList.innerHTML = entries.map(([name, stats]) => `<li><button class="lb-user" data-user="${name}">${name}</button><span>${stats.total || 0}</span></li>`).join("");
+    const anonKey = getAnonymousKey();
+    leaderboardList.innerHTML = entries.map(([name, stats]) => {
+        const display = name === anonKey ? 'Anonymous (this device)' : name;
+        return `<li><button class="lb-user" data-user="${name}">${display}</button><span>${stats.total || 0}</span></li>`;
+    }).join("");
 
     leaderboardList.querySelectorAll('.lb-user').forEach(btn => {
         btn.addEventListener('click', () => openProfile(btn.getAttribute('data-user')));
@@ -366,10 +386,21 @@ function initializeGame() {
     running = true;
     renderLeaderboard();
     initAuthUI();
+    updateAdminLinkVisibility();
     // Als de computer begint, doe dan meteen een zet
     if (currentPlayer === "O") {
         setTimeout(computerMove, 500);
     }
+}
+
+function updateAdminLinkVisibility() {
+    const link = document.getElementById('admin-link');
+    if (!link) return;
+    const users = loadUsers();
+    const u = getCurrentUser();
+    // Mark admin by special flag on user record: { passwordHash, role: 'admin' }
+    const isAdmin = !!(u && users[u] && users[u].role === 'admin');
+    link.style.display = isAdmin ? '' : 'none';
 }
 
 // Wanneer je op een vakje klikt om te zetten
@@ -570,7 +601,7 @@ function updateWins() {
         firstPlayerWins++;
         firstplayerCredits.textContent = firstPlayerWins;
         const board = loadLeaderboard();
-        const name = currentUserName || "Anonymous";
+        const name = (currentUserName && currentUserName !== 'Anonymous') ? currentUserName : getAnonymousKey();
         const difficulty = (aiDifficultySelect && aiDifficultySelect.value) || window.localStorage.getItem("ttt_ai_difficulty") || "medium";
         const existing = board[name];
         if (typeof existing === 'number') {
