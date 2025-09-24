@@ -76,6 +76,10 @@ function getCurrentUser() {
 function openAuthModal() {
     const modal = document.querySelector('.auth-modal');
     if (!modal) return;
+    // Lazily initialize UI bindings if needed (script loads before modal HTML)
+    if (!window.__tttAuthInitialized) {
+        initAuthUI();
+    }
     modal.classList.add('open');
     const logoutBtn = modal.querySelector('.auth-logout');
     const tabsEl = modal.querySelector('.auth-tabs');
@@ -217,6 +221,7 @@ function initAuthUI() {
     usernameButton.addEventListener('click', openAuthModal);
     // ensure default state
     showTab('login');
+    window.__tttAuthInitialized = true;
 }
 
  
