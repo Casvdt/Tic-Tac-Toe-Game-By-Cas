@@ -285,6 +285,28 @@ button:active { transform: translateY(1px); }
   box-shadow: 0 20px 40px rgba(0,0,0,0.45);
 }
 
+/* Auth modal tweaks reuse profile modal base */
+.auth-modal .auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.auth-modal .auth-tab {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.auth-modal .input-group { display: grid; gap: 6px; margin: 8px 0; }
+.auth-modal input {
+  background: rgba(20,22,28,0.98);
+  color: #eaeaea;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.auth-modal .auth-footer { margin-top: 8px; display: flex; justify-content: flex-end; }
+
 .profile-close {
   position: absolute;
   right: 18px;

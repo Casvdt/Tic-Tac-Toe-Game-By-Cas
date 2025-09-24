@@ -22,18 +22,128 @@ let audioStarted = false; // Start muziek pas na eerste klik/toets
 
 
 
-// Vraagt om een naam en slaat die op
-function myUsername() {
-    let person = prompt("Please choose a username:", "");
-    let text = person && person.trim() !== "" ? person.trim() : "Anonymous";
-    document.querySelector(".demo").innerHTML = text;
-    window.localStorage.setItem("username", text);
-    currentUserName = text;
+// === Simple localStorage-based authentication ===
+// Users are stored in localStorage under key 'ttt_users' as map { username: { passwordHash } }
+// Current user is stored under key 'username'
+
+function loadUsers() {
+    try {
+        const raw = window.localStorage.getItem('ttt_users');
+        return raw ? JSON.parse(raw) : {};
+    } catch (_) {
+        return {};
+    }
+}
+
+function saveUsers(map) {
+    window.localStorage.setItem('ttt_users', JSON.stringify(map));
+}
+
+function hashPassword(str) {
+    // Lightweight non-crypto hash for demo (do NOT use in production)
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return String(h);
+}
+
+function setCurrentUser(name) {
+    currentUserName = name;
+    document.querySelector('.demo').textContent = name;
+    window.localStorage.setItem('username', name);
     renderLeaderboard();
 }
 
-// Klik op de knop om je naam te kiezen
-  usernameButton.addEventListener("click", myUsername);
+function getCurrentUser() {
+    return window.localStorage.getItem('username') || null;
+}
+
+function openAuthModal() {
+    const modal = document.querySelector('.auth-modal');
+    if (!modal) return;
+    modal.classList.add('open');
+    const logoutBtn = modal.querySelector('.auth-logout');
+    const logged = !!getCurrentUser();
+    logoutBtn.style.display = logged ? '' : 'none';
+}
+
+function closeAuthModal() {
+    const modal = document.querySelector('.auth-modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+}
+
+function initAuthUI() {
+    const modal = document.querySelector('.auth-modal');
+    if (!modal) return;
+    const loginTab = modal.querySelector('.auth-tab-login');
+    const registerTab = modal.querySelector('.auth-tab-register');
+    const loginForm = modal.querySelector('.auth-form-login');
+    const registerForm = modal.querySelector('.auth-form-register');
+    const closeBtn = modal.querySelector('.auth-close');
+    const logoutBtn = modal.querySelector('.auth-logout');
+
+    function showTab(tab) {
+        if (tab === 'login') {
+            loginForm.style.display = '';
+            registerForm.style.display = 'none';
+        } else {
+            loginForm.style.display = 'none';
+            registerForm.style.display = '';
+        }
+    }
+
+    loginTab.addEventListener('click', () => showTab('login'));
+    registerTab.addEventListener('click', () => showTab('register'));
+    closeBtn.addEventListener('click', closeAuthModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeAuthModal(); });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = loginForm.querySelector('.auth-username').value.trim();
+        const password = loginForm.querySelector('.auth-password').value;
+        if (!username || !password) return;
+        const users = loadUsers();
+        const user = users[username];
+        if (!user) {
+            alert('User not found');
+            return;
+        }
+        if (user.passwordHash !== hashPassword(password)) {
+            alert('Incorrect password');
+            return;
+        }
+        setCurrentUser(username);
+        closeAuthModal();
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = registerForm.querySelector('.reg-username').value.trim();
+        const password = registerForm.querySelector('.reg-password').value;
+        if (!username || !password) return;
+        const users = loadUsers();
+        if (users[username]) {
+            alert('Username already exists');
+            return;
+        }
+        users[username] = { passwordHash: hashPassword(password) };
+        saveUsers(users);
+        setCurrentUser(username);
+        closeAuthModal();
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        window.localStorage.removeItem('username');
+        currentUserName = 'Anonymous';
+        document.querySelector('.demo').textContent = currentUserName;
+        closeAuthModal();
+    });
+
+    // Hook User button to open modal
+    usernameButton.addEventListener('click', openAuthModal);
+}
 
  
 
@@ -162,6 +272,7 @@ function initializeGame() {
     turnText.textContent = `${currentPlayer}'s turn`;
     running = true;
     renderLeaderboard();
+    initAuthUI();
     // Als de computer begint, doe dan meteen een zet
     if (currentPlayer === "O") {
         setTimeout(computerMove, 500);

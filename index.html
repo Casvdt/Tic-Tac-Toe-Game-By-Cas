@@ -101,6 +101,33 @@
       </div>
     </div>
   </div>
+
+  <!-- Auth Modal (login/register) -->
+  <div class="profile-modal auth-modal">
+    <div class="profile-content">
+      <button class="auth-close" aria-label="Close">×</button>
+      <h3 class="auth-title">Welcome</h3>
+      <div class="auth-tabs">
+        <button class="auth-tab auth-tab-login" data-tab="login">Login</button>
+        <button class="auth-tab auth-tab-register" data-tab="register">Register</button>
+      </div>
+      <div class="auth-forms">
+        <form class="auth-form auth-form-login" autocomplete="on">
+          <div class="input-group"><label>Username</label><input class="auth-username" name="username" required></div>
+          <div class="input-group"><label>Password</label><input class="auth-password" name="password" type="password" required></div>
+          <button type="submit" class="auth-submit">Login</button>
+        </form>
+        <form class="auth-form auth-form-register" autocomplete="on" style="display:none">
+          <div class="input-group"><label>Username</label><input class="reg-username" name="username" required></div>
+          <div class="input-group"><label>Password</label><input class="reg-password" name="password" type="password" required></div>
+          <button type="submit" class="auth-submit">Create account</button>
+        </form>
+      </div>
+      <div class="auth-footer">
+        <button class="auth-logout" style="display:none">Log out</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>
