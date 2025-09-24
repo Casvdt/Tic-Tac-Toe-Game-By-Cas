@@ -82,16 +82,15 @@ function closeAuthModal() {
 
 function initAuthUI() {
     const modal = document.querySelector('.auth-modal');
+    if (!modal) {
+        return; // modal not in DOM; openAuthModal is still wired to button
+    }
     const loginTab = modal.querySelector('.auth-tab-login');
     const registerTab = modal.querySelector('.auth-tab-register');
     const loginForm = modal.querySelector('.auth-form-login');
     const registerForm = modal.querySelector('.auth-form-register');
     const closeBtn = modal.querySelector('.auth-close');
     const logoutBtn = modal.querySelector('.auth-logout');
-
-    if (!modal) {
-        return; // modal not in DOM; openAuthModal is still wired to button
-    }
 
     function showTab(tab) {
         if (tab === 'login') {
