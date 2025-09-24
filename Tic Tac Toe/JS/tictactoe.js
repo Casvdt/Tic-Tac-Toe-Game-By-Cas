@@ -70,8 +70,28 @@ function openAuthModal() {
     if (!modal) return;
     modal.classList.add('open');
     const logoutBtn = modal.querySelector('.auth-logout');
-    const logged = !!getCurrentUser();
+    const tabsEl = modal.querySelector('.auth-tabs');
+    const formsEl = modal.querySelector('.auth-forms');
+    const titleEl = modal.querySelector('.auth-title');
+    const loggedUser = getCurrentUser();
+    const logged = !!loggedUser;
     logoutBtn.style.display = logged ? '' : 'none';
+    if (logged) {
+        if (tabsEl) tabsEl.style.display = 'none';
+        if (formsEl) formsEl.style.display = 'none';
+        if (titleEl) titleEl.textContent = `Logged in as ${loggedUser}`;
+    } else {
+        if (tabsEl) tabsEl.style.display = '';
+        if (formsEl) formsEl.style.display = '';
+        if (titleEl) titleEl.textContent = 'Welcome';
+        // default to login view
+        const loginForm = modal.querySelector('.auth-form-login');
+        const registerForm = modal.querySelector('.auth-form-register');
+        if (loginForm && registerForm) {
+            loginForm.style.display = '';
+            registerForm.style.display = 'none';
+        }
+    }
 }
 
 function closeAuthModal() {
@@ -123,6 +143,15 @@ function initAuthUI() {
             return;
         }
         setCurrentUser(username);
+        // reflect logged in state in modal
+        const titleEl = modal.querySelector('.auth-title');
+        const tabsEl = modal.querySelector('.auth-tabs');
+        const formsEl = modal.querySelector('.auth-forms');
+        const logoutBtn = modal.querySelector('.auth-logout');
+        if (titleEl) titleEl.textContent = `Logged in as ${username}`;
+        if (tabsEl) tabsEl.style.display = 'none';
+        if (formsEl) formsEl.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = '';
         closeAuthModal();
     });
 
@@ -139,6 +168,14 @@ function initAuthUI() {
         users[username] = { passwordHash: hashPassword(password) };
         saveUsers(users);
         setCurrentUser(username);
+        const titleEl = modal.querySelector('.auth-title');
+        const tabsEl = modal.querySelector('.auth-tabs');
+        const formsEl = modal.querySelector('.auth-forms');
+        const logoutBtn = modal.querySelector('.auth-logout');
+        if (titleEl) titleEl.textContent = `Logged in as ${username}`;
+        if (tabsEl) tabsEl.style.display = 'none';
+        if (formsEl) formsEl.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = '';
         closeAuthModal();
     });
 
@@ -146,11 +183,21 @@ function initAuthUI() {
         window.localStorage.removeItem('username');
         currentUserName = 'Anonymous';
         document.querySelector('.demo').textContent = currentUserName;
+        const tabsEl = modal.querySelector('.auth-tabs');
+        const formsEl = modal.querySelector('.auth-forms');
+        const titleEl = modal.querySelector('.auth-title');
+        const logoutBtn = modal.querySelector('.auth-logout');
+        if (tabsEl) tabsEl.style.display = '';
+        if (formsEl) formsEl.style.display = '';
+        if (titleEl) titleEl.textContent = 'Welcome';
+        if (logoutBtn) logoutBtn.style.display = 'none';
         closeAuthModal();
     });
 
     // Hook User button to open modal
     usernameButton.addEventListener('click', openAuthModal);
+    // ensure default state
+    showTab('login');
 }
 
  
