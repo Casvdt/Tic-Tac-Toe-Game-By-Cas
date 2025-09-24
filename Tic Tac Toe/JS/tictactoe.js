@@ -81,6 +81,10 @@ function openAuthModal() {
     const tabsEl = modal.querySelector('.auth-tabs');
     const formsEl = modal.querySelector('.auth-forms');
     const titleEl = modal.querySelector('.auth-title');
+    const loginForm = modal.querySelector('.auth-form-login');
+    const registerForm = modal.querySelector('.auth-form-register');
+    const loginTabBtn = modal.querySelector('.auth-tab-login');
+    const registerTabBtn = modal.querySelector('.auth-tab-register');
     const loggedUser = getCurrentUser();
     const logged = !!loggedUser;
     logoutBtn.style.display = logged ? '' : 'none';
@@ -91,13 +95,13 @@ function openAuthModal() {
     } else {
         if (tabsEl) tabsEl.style.display = '';
         if (formsEl) formsEl.style.display = '';
-        if (titleEl) titleEl.textContent = 'Welcome';
-        // default to login view
-        const loginForm = modal.querySelector('.auth-form-login');
-        const registerForm = modal.querySelector('.auth-form-register');
-        if (loginForm && registerForm) {
+        // default to login view with clear heading and active tab
+        if (titleEl) titleEl.textContent = 'Login';
+        if (loginForm && registerForm && loginTabBtn && registerTabBtn) {
             loginForm.style.display = '';
             registerForm.style.display = 'none';
+            loginTabBtn.classList.add('active');
+            registerTabBtn.classList.remove('active');
         }
     }
 }
@@ -121,12 +125,19 @@ function initAuthUI() {
     const logoutBtn = modal.querySelector('.auth-logout');
 
     function showTab(tab) {
+        const titleEl = modal.querySelector('.auth-title');
         if (tab === 'login') {
             loginForm.style.display = '';
             registerForm.style.display = 'none';
+            if (titleEl) titleEl.textContent = 'Login';
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
         } else {
             loginForm.style.display = 'none';
             registerForm.style.display = '';
+            if (titleEl) titleEl.textContent = 'Register';
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
         }
     }
 
