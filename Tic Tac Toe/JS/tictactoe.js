@@ -62,7 +62,9 @@ function setCurrentUser(name) {
 }
 
 function getCurrentUser() {
-    return window.localStorage.getItem('username') || null;
+    const u = window.localStorage.getItem('username');
+    if (!u || u === 'Anonymous') return null;
+    return u;
 }
 
 function openAuthModal() {
@@ -191,7 +193,7 @@ function initAuthUI() {
         if (formsEl) formsEl.style.display = '';
         if (titleEl) titleEl.textContent = 'Welcome';
         if (logoutBtn) logoutBtn.style.display = 'none';
-        closeAuthModal();
+        // Do not close immediately; let user choose to log in/register
     });
 
     // Hook User button to open modal
