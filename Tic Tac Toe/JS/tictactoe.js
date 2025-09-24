@@ -55,9 +55,15 @@ function hashPassword(str) {
 }
 
 function setCurrentUser(name) {
-    currentUserName = name;
-    document.querySelector('.demo').textContent = name;
-    window.localStorage.setItem('username', name);
+    if (!name || name === 'Anonymous') {
+        window.localStorage.removeItem('username');
+        currentUserName = 'Anonymous';
+        document.querySelector('.demo').textContent = currentUserName;
+    } else {
+        currentUserName = name;
+        document.querySelector('.demo').textContent = name;
+        window.localStorage.setItem('username', name);
+    }
     renderLeaderboard();
 }
 
@@ -206,8 +212,13 @@ function initAuthUI() {
 
 
 // Huidige gebruikersnaam uit opslag (of standaard)
-let currentUserName = window.localStorage.getItem('username') || "Anonymous";
-document.querySelector(".demo").innerHTML = currentUserName;
+let storedUser = window.localStorage.getItem('username');
+if (!storedUser || storedUser === 'Anonymous') {
+    window.localStorage.removeItem('username');
+    storedUser = null;
+}
+let currentUserName = storedUser || "Anonymous";
+document.querySelector(".demo").textContent = currentUserName;
 
 // Leest de ranglijst uit lokale opslag
 function loadLeaderboard() {
