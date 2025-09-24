@@ -7,6 +7,12 @@ const turnText = document.querySelector(".turnText");
 const restartButton = document.querySelector(".restartButton");
 // Knop om je gebruikersnaam in te voeren
 const usernameButton = document.querySelector(".Userbtn");
+if (usernameButton) {
+    usernameButton.addEventListener('click', () => {
+        // Attach early so it works even if modal is appended later
+        openAuthModal();
+    });
+}
 // Tellers voor de score (X en O)
 let firstplayerCredits = document.querySelector(".firstplayerCredits");
 let secondplayerCredits = document.querySelector(".secondplayerCredits");
@@ -76,13 +82,16 @@ function closeAuthModal() {
 
 function initAuthUI() {
     const modal = document.querySelector('.auth-modal');
-    if (!modal) return;
     const loginTab = modal.querySelector('.auth-tab-login');
     const registerTab = modal.querySelector('.auth-tab-register');
     const loginForm = modal.querySelector('.auth-form-login');
     const registerForm = modal.querySelector('.auth-form-register');
     const closeBtn = modal.querySelector('.auth-close');
     const logoutBtn = modal.querySelector('.auth-logout');
+
+    if (!modal) {
+        return; // modal not in DOM; openAuthModal is still wired to button
+    }
 
     function showTab(tab) {
         if (tab === 'login') {
