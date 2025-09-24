@@ -145,10 +145,19 @@ function initAuthUI() {
         }
     }
 
-    loginTab.addEventListener('click', () => showTab('login'));
-    registerTab.addEventListener('click', () => showTab('register'));
-    closeBtn.addEventListener('click', closeAuthModal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeAuthModal(); });
+    loginTab.addEventListener('click', (e) => { e.preventDefault(); showTab('login'); });
+    registerTab.addEventListener('click', (e) => { e.preventDefault(); showTab('register'); });
+    closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeAuthModal(); });
+    // Close if clicking backdrop (outside content)
+    modal.addEventListener('click', (e) => {
+        if (!e.target.closest('.profile-content')) {
+            closeAuthModal();
+        }
+    });
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeAuthModal();
+    });
 
     loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
