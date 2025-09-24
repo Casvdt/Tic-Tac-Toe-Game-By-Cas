@@ -297,6 +297,11 @@ button:active { transform: translateY(1px); }
   padding: 6px 10px;
   border-radius: 8px;
 }
+.auth-modal .auth-tab.active {
+  background: rgba(0, 180, 255, 0.18);
+  border-color: rgba(0, 180, 255, 0.45);
+  box-shadow: 0 0 14px rgba(0, 180, 255, 0.25) inset;
+}
 .auth-modal .input-group { display: grid; gap: 6px; margin: 8px 0; }
 .auth-modal input {
   background: rgba(20,22,28,0.98);
